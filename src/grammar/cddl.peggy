@@ -1,40 +1,89 @@
-{
-  // RFC 8610 Appendix B inspired grammar:
-  // https://datatracker.ietf.org/doc/html/rfc8610#appendix-B
-}
-
+// Auto-generated from src/grammar/cddl.abnf via npm abnf.
+// Source ABNF: RFC 8610 Appendix B
+// https://datatracker.ietf.org/doc/html/rfc8610#appendix-B
 cddl
-  = S rule:(rule S)+ !. { return rule.length; }
+  = S (rule S)+
+
+S
+  = WS*
 
 rule
   = typename genericparm? S assignt S type
   / groupname genericparm? S assigng S grpent
 
+WS
+  = SP
+  / NL
+
 typename
   = id
 
-groupname
-  = id
+genericparm
+  = "<" S id S ("," S id S)* ">"
 
 assignt
   = "="
   / "/="
 
+type
+  = type1 (S "/" S type1)*
+
+groupname
+  = id
+
 assigng
   = "="
   / "//="
 
-genericparm
-  = "<" S id S ("," S id S)* ">"
+grpent
+  = (occur S)? (memberkey S)? type
+  / (occur S)? groupname genericarg?
+  / (occur S)? "(" S group S ")"
+
+SP
+  = " "
+
+NL
+  = COMMENT
+  / CRLF
+
+id
+  = EALPHA (("-" / ".")* (EALPHA / DIGIT))*
+
+type1
+  = type2 (S (rangeop / ctlop) S type2)?
+
+occur
+  = uint? "*" uint?
+  / "+"
+  / "?"
+
+memberkey
+  = type1 S ("^" S)? "=>"
+  / bareword S ":"
+  / value S ":"
 
 genericarg
   = "<" S type1 S ("," S type1 S)* ">"
 
-type
-  = type1 (S "/" S type1)*
+group
+  = grpchoice (S "//" S grpchoice)*
 
-type1
-  = type2 (S (rangeop / ctlop) S type2)?
+COMMENT
+  = ";" PCHAR* CRLF
+
+CRLF
+  = "\n"
+  / "\r\n"
+
+EALPHA
+  = ALPHA
+  / "@"
+  / "_"
+  / "$"
+
+DIGIT
+  = [\x30-\x39]
 
 type2
   = value
@@ -56,130 +105,101 @@ rangeop
 ctlop
   = "." id
 
-group
-  = grpchoice (S "//" S grpchoice)*
-
-grpchoice
-  = (grpent optcom)*
-
-grpent
-  = occur? S? memberkey S type
-  / occur? S? groupname genericarg?
-  / occur? S? "(" S group S ")"
-
-memberkey
-  = type1 S "^"? S? "=>"
-  / bareword S ":"
-  / value S ":"
+uint
+  = DIGIT1 DIGIT*
+  / "0x"i HEXDIG+
+  / "0b"i BINDIG+
+  / "0"
 
 bareword
   = id
-
-optcom
-  = S ","? S
-
-occur
-  = uint? "*" uint?
-  / "+"
-  / "?"
-
-uint
-  = DIGIT1 DIGIT*
-  / "0x" HEXDIG+
-  / "0b" BINDIG+
-  / "0"
 
 value
   = number
   / text
   / bytes
 
-int
-  = "-"? uint
+grpchoice
+  = (grpent optcom)*
+
+PCHAR
+  = [\x20-\x7e]
+  / [\x80-\ud7ff]
+  / [\ue000-\uffff]
+  / "\ud800" [\udc00-\udfff]
+  / [\ud801-\udbfe] [\udc00-\udfff]
+  / "\udbff" [\udc00-\udffd]
+
+ALPHA
+  = [\x41-\x5a]
+  / [\x61-\x7a]
+
+DIGIT1
+  = [\x31-\x39]
+
+HEXDIG
+  = DIGIT
+  / "A"i
+  / "B"i
+  / "C"i
+  / "D"i
+  / "E"i
+  / "F"i
+
+BINDIG
+  = [\x30\x31]
 
 number
   = hexfloat
-  / int ("." fraction)? ([eE] exponent)?
+  / (int ("." fraction)? ("e"i exponent)?)
+
+text
+  = "\"" SCHAR* "\""
+
+bytes
+  = bsqual? "'" BCHAR* "'"
+
+optcom
+  = S ("," S)?
 
 hexfloat
-  = "-"? "0x" HEXDIG+ ("." HEXDIG+)? [pP] exponent
+  = "-"? "0x"i HEXDIG+ ("." HEXDIG+)? "p"i exponent
+
+int
+  = "-"? uint
 
 fraction
   = DIGIT+
 
 exponent
-  = [+-]? DIGIT+
-
-text
-  = "\"" SCHAR* "\""
+  = ("+" / "-")? DIGIT+
 
 SCHAR
-  = [ !#-\[\]-~\u0080-\u{10FFFD}]
+  = [\x20\x21]
+  / [\x23-\x5b]
+  / [\x5d-\x7e]
+  / [\x80-\ud7ff]
+  / [\ue000-\uffff]
+  / "\ud800" [\udc00-\udfff]
+  / [\ud801-\udbfe] [\udc00-\udfff]
+  / "\udbff" [\udc00-\udffd]
   / SESC
-
-SESC
-  = "\\" [\u0020-\u007E\u0080-\u{10FFFD}]
-
-bytes
-  = bsqual? "'" BCHAR* "'"
-
-BCHAR
-  = [ -&(-\[\]-\u{10FFFD}]
-  / SESC
-  / CRLF
 
 bsqual
-  = "h"
-  / "b64"
+  = "h"i
+  / "b64"i
 
-id
-  = EALPHA idtail*
-
-idtail
-  = ("-" / ".")* (EALPHA / DIGIT)
-
-EALPHA
-  = ALPHA
-  / "@"
-  / "_"
-  / "$"
-
-ALPHA
-  = [A-Za-z]
-
-DIGIT
-  = [0-9]
-
-DIGIT1
-  = [1-9]
-
-HEXDIG
-  = [0-9A-F]
-  / [a-f]
-
-BINDIG
-  = [01]
-
-S
-  = WS*
-
-WS
-  = SP
-  / NL
-
-SP
-  = " "
-
-NL
-  = COMMENT
+BCHAR
+  = [\x20-\x26]
+  / [\x28-\x5b]
+  / [\x5d-\ud7ff]
+  / [\ue000-\uffff]
+  / "\ud800" [\udc00-\udfff]
+  / [\ud801-\udbfe] [\udc00-\udfff]
+  / "\udbff" [\udc00-\udffd]
+  / SESC
   / CRLF
 
-COMMENT
-  = ";" PCHAR* CRLF
+SESC
+  = "\\" ([\x20-\x7e] / [\x80-\ud7ff] / [\ue000-\uffff] / "\ud800" [\udc00-\udfff] / [\ud801-\udbfe] [\udc00-\udfff] / "\udbff" [\udc00-\udffd])
 
-PCHAR
-  = [\u0020-\u007E\u0080-\u{10FFFD}]
-
-CRLF
-  = "\r\n"
-  / "\n"

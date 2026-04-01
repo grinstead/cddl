@@ -3,6 +3,8 @@
 Validate CDDL files from the command line and in Node.js.
 
 The parser is based on the RFC 8610 Appendix B grammar.
+Source-of-truth is ABNF in `src/grammar/cddl.abnf`, which is converted
+to Peggy in build steps.
 
 ## CLI
 
@@ -37,6 +39,7 @@ npm test
 Parser generation:
 
 ```bash
+npm run generate:peggy
 npm run generate:parser
 ```
 

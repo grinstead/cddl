@@ -13,7 +13,8 @@
     "src/grammar"
   ],
   "scripts": {
-    "generate:parser": "node scripts/build-parser.mjs",
+    "generate:peggy": "node scripts/build-peggy-from-abnf.mjs",
+    "generate:parser": "npm run generate:peggy && node scripts/build-parser.mjs",
     "build": "npm run generate:parser && tsc -p tsconfig.json",
     "test": "npm run build && node --test dist/test/**/*.test.js",
     "prepare": "npm run build"
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.6.2",
+    "abnf": "^5.0.4",
     "peggy": "^5.0.6",
     "typescript": "^5.9.2"
   }
