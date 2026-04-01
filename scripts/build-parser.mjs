@@ -19,6 +19,7 @@ await new Promise((resolve, reject) => {
       "es",
       "--allowed-start-rules",
       "cddl",
+      "--trace",
       "--return-types",
       "{\"cddl\":\"unknown\"}",
       "--dts",
