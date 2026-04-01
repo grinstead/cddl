@@ -1,1 +1,1 @@
-export { parseCddl, validateCddl, CddlParseError } from "./parser.js";
+export { parseCddl, PeggySyntaxError } from "./parser.js";

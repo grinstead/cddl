@@ -29,10 +29,9 @@ npx @grinstead/cddl validate a.cddl b.cddl
 ## Library
 
 ```ts
-import { parseCddl, validateCddl } from "@grinstead/cddl";
+import { parseCddl } from "@grinstead/cddl";
 
 parseCddl("person = { age: int }");
-validateCddl("person = { age: int }");
 ```
 
 ## Development
@@ -48,4 +47,3 @@ Parser generation:
 npm run generate:peggy
 npm run generate:parser
 ```
-

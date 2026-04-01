@@ -2,43 +2,22 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
-import { parseCddl, CddlParseError } from "./parser.js";
+import { parseCddl } from "./parser.js";
 
-async function validateFile(file: string): Promise<boolean> {
+async function validateFile(
+  file: string,
+): Promise<{ status: "fulfilled" } | { status: "rejected"; reason: string }> {
   const absolutePath = path.resolve(process.cwd(), file);
   const input = await fs.readFile(absolutePath, "utf8");
 
-  try {
-    parseCddl(input, { source: file });
-    console.log(`valid CDDL: ${file}`);
-    return true;
-  } catch (error) {
-    if (error instanceof CddlParseError) {
-      if (error.formattedMessage) {
-        console.error(error.formattedMessage);
-        return false;
-      }
+  const result = parseCddl(input, { source: file });
 
-      if (error.line && error.column) {
-        console.error(`invalid CDDL: ${file}:${error.line}:${error.column}`);
-        console.error(error.message);
-        return false;
-      }
+  if (result.status === "fulfilled") return result;
 
-      console.error(`invalid CDDL: ${file}`);
-      console.error(error.message);
-      return false;
-    }
-
-    if (error instanceof Error) {
-      console.error(`invalid CDDL: ${file}`);
-      console.error(error.message);
-      return false;
-    }
-
-    console.error(`invalid CDDL: ${file}`);
-    return false;
-  }
+  return {
+    status: "rejected",
+    reason: result.reason.format([{ source: file, text: input }]),
+  };
 }
 
 function printUsage(): void {
@@ -75,8 +54,16 @@ async function main(): Promise<void> {
 
   let allValid = true;
   for (const file of args) {
-    const valid = await validateFile(file);
-    allValid = allValid && valid;
+    const result = await validateFile(file);
+
+    if (result.status === "rejected") {
+      let { reason } = result;
+
+      if (!allValid) reason = `\n${reason}`;
+      console.error(reason);
+
+      allValid = false;
+    }
   }
 
   process.exit(allValid ? 0 : 2);

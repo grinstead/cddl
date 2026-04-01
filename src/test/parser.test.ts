@@ -10,7 +10,8 @@ person = {
 }
 `;
 
-  assert.doesNotThrow(() => parseCddl(input));
+  const result = parseCddl(input);
+  assert.equal(result.status, "fulfilled");
 });
 
 test("rejects clearly invalid CDDL", () => {
@@ -20,5 +21,6 @@ person = {
 }
 `;
 
-  assert.throws(() => parseCddl(input));
+  const result = parseCddl(input);
+  assert.equal(result.status, "rejected");
 });
