@@ -4,19 +4,31 @@ import path from "node:path";
 import process from "node:process";
 import { parseCddl } from "./parser.js";
 
+let stdin: undefined | Promise<string>;
+
+async function readStdin(): Promise<string> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of process.stdin) {
+    chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks).toString("utf8");
+}
+
 async function validateFile(
   file: string,
 ): Promise<{ status: "fulfilled" } | { status: "rejected"; reason: string }> {
-  const absolutePath = path.resolve(process.cwd(), file);
-  const input = await fs.readFile(absolutePath, "utf8");
+  const source = file === "-" ? "<stdin>" : file;
+  const input = await (file === "-"
+    ? (stdin ??= readStdin())
+    : fs.readFile(path.resolve(process.cwd(), file), "utf8"));
 
-  const result = parseCddl(input, { source: file });
+  const result = parseCddl(input, { source });
 
   if (result.status === "fulfilled") return result;
 
   return {
     status: "rejected",
-    reason: result.reason.format([{ source: file, text: input }]),
+    reason: result.reason.format([{ source, text: input }]),
   };
 }
 
@@ -24,10 +36,10 @@ function printUsage(): void {
   console.log(
     `
 Usage:
-  cddl validate <filenames...>
+  cddl validate <filenames... | ->
 
 Commands:
-  validate   Validate one or more CDDL files.
+  validate   Validate one or more CDDL files. Use '-' to read stdin.
 `.trim(),
   );
 }

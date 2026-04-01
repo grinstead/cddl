@@ -26,6 +26,12 @@ You can validate multiple files in one call:
 npx @grinstead/cddl validate a.cddl b.cddl
 ```
 
+You can also validate from standard input:
+
+```bash
+cat schema.cddl | npx @grinstead/cddl validate -
+```
+
 ## Library
 
 ```ts
