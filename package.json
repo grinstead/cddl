@@ -31,7 +31,18 @@
     "rfc8610",
     "parser"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/grinstead/cddl.git"
+  },
+  "bugs": {
+    "url": "https://github.com/grinstead/cddl/issues"
+  },
+  "homepage": "https://github.com/grinstead/cddl#readme",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=20"
   },
