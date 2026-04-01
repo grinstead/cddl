@@ -9,12 +9,23 @@ async function validateFile(file: string): Promise<boolean> {
   const input = await fs.readFile(absolutePath, "utf8");
 
   try {
-    parseCddl(input);
+    parseCddl(input, { source: file });
     console.log(`valid CDDL: ${file}`);
     return true;
   } catch (error) {
-    if (error instanceof CddlParseError && error.line && error.column) {
-      console.error(`invalid CDDL: ${file}:${error.line}:${error.column}`);
+    if (error instanceof CddlParseError) {
+      if (error.formattedMessage) {
+        console.error(error.formattedMessage);
+        return false;
+      }
+
+      if (error.line && error.column) {
+        console.error(`invalid CDDL: ${file}:${error.line}:${error.column}`);
+        console.error(error.message);
+        return false;
+      }
+
+      console.error(`invalid CDDL: ${file}`);
       console.error(error.message);
       return false;
     }

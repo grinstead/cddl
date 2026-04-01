@@ -15,7 +15,7 @@
   "scripts": {
     "generate:peggy": "node scripts/build-peggy-from-abnf.mjs",
     "generate:parser": "npm run generate:peggy && node scripts/build-parser.mjs",
-    "build": "npm run generate:parser && tsc -p tsconfig.json",
+    "build": "npm run generate:parser && tsc -p tsconfig.json && node scripts/copy-generated-runtime.mjs",
     "test": "npm run build && node --test dist/test/**/*.test.js",
     "prepare": "npm run build"
   },
