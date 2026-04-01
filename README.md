@@ -9,7 +9,7 @@ to Peggy in build steps.
 ## CLI
 
 ```bash
-npx @grinstead/cddl schema.cddl
+npx @grinstead/cddl validate schema.cddl
 ```
 
 On success:
@@ -19,6 +19,12 @@ valid CDDL: schema.cddl
 ```
 
 On failure, output includes line and column when available.
+
+You can validate multiple files in one call:
+
+```bash
+npx @grinstead/cddl validate a.cddl b.cddl
+```
 
 ## Library
 
