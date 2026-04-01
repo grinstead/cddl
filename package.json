@@ -1,0 +1,36 @@
+{
+  "name": "@grinstead/cddl",
+  "version": "0.1.0",
+  "description": "Validate and parse Concise Data Definition Language (CDDL) files",
+  "type": "module",
+  "bin": {
+    "cddl": "dist/cli.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src/grammar"
+  ],
+  "scripts": {
+    "generate:parser": "node scripts/build-parser.mjs",
+    "build": "npm run generate:parser && tsc -p tsconfig.json",
+    "test": "npm run build && node --test dist/test/**/*.test.js",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "cddl",
+    "cbor",
+    "rfc8610",
+    "parser"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.2",
+    "peggy": "^5.0.6",
+    "typescript": "^5.9.2"
+  }
+}
